@@ -1,22 +1,22 @@
 # Site settings
-title: Lahmsworld
+title: 远山呜莫
 SEOTitle: 一个博客 | Lahmsworld
 header-img: img/home-bg.jpg
-email: lahmsworld@gmail.com
+email: lahmsworld@qq.com
 description: ""
 keyword: ""
-url: "https://lahmsworld.github.io/"              # your host, for absolute URL
+url: "https://umou.site/"              # your host, for absolute URL
 baseurl: "/"         # for example, '/blog' if your blog hosted on 'host/blog'
 
 
 
 # SNS settings
 RSS: false
-weibo_username:     lahmsworld
+weibo_username:     enzanumo
 zhihu_username:     lahmsworld
 github_username:    lahmsworld
 #twitter_username:  lahmsworld
-facebook_username:  lahmsworld
+#facebook_username:  lahmsworld
 
 
 
@@ -59,10 +59,10 @@ duoshuo_share: false                     # set to false if you want to use Comme
 
 # Analytics settings
 # Baidu Analytics
-ba_track_id: 4cc1f2d8f3067386cc5cdb626a202900
-# Google Analytics
-ga_track_id: 'UA-49627206-1'            # Format: UA-xxxxxx-xx
-ga_domain: huangxuan.me
+# ba_track_id: 4cc1f2d8f3067386cc5cdb626a202900
+# # Google Analytics
+# ga_track_id: 'UA-49627206-1'            # Format: UA-xxxxxx-xx
+# ga_domain: umou.site
 
 
 
@@ -80,18 +80,18 @@ featured-condition-size: 1              # A tag will be featured if the size of 
 
 
 # Friends
-friends: [
-    {
-        title: "Foo",
-        href: "#"
-    },{
-        title: "Bar",
-        href: "#"
-    },{
-        title: "Example Friends",
-        href: "#"
-    },{
-        title: "It helps SEO",
-        href: "#"
-    }
-]
+# friends: [
+    # {
+        # title: "Foo",
+        # href: "#"
+    # },{
+        # title: "Bar",
+        # href: "#"
+    # },{
+        # title: "Example Friends",
+        # href: "#"
+    # },{
+        # title: "It helps SEO",
+        # href: "#"
+    # }
+# ]
