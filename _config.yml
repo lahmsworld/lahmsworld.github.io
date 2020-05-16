@@ -79,7 +79,7 @@ netease_comment: false
 # Sidebar settings
 sidebar: true
 # whether or not using Sidebar.
-sidebar-about-description: "远山呜莫<br>想成为很厉害的人。"
+sidebar-about-description: "<b>远山呜莫</b><br>想成为很厉害的人。"
 sidebar-avatar: /img/avatar.jpg
 # use absolute URL, seeing it's used in both `/` and `/about/`
 
