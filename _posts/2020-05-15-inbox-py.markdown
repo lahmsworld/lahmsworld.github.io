@@ -4,7 +4,7 @@ title:      "Inbox.py"
 subtitle:   "我的第一个Python程序"
 date:       2020-05-16 22:18:00
 author:     "Umo"
-header-img: "img/post/helloworld.jpg"
+header-img: "img/post/inbox.jpg"
 catalog: true
 tags:
     - Python
