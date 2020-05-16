@@ -1,0 +1,269 @@
+---
+layout:     post
+title:      "Inbox.py"
+subtitle:   "我的第一个Python程序"
+date:       2020-05-16 22:18:00
+author:     "Umo"
+header-img: "img/post/helloworld.jpg"
+catalog: true
+tags:
+    - Python
+    - 技术
+---
+
+
+
+## 我的第一个Python程序的前世今生
+
+课上，老师让大家用数字介绍自己。我说，我的手机里有5000张照片，并给大家看了一眼我的iPhone 8（我可不敢用安卓手机存5000张照片）。这时候，一个平常不怎么爱说话的女同学提出了一个尖锐的问题：
+
+> 你都不把照片导进电脑里的吗？
+
+这个问题很简单。当然了！我当然会把照片导进电脑里。不过我被问到的时候还是语塞了，因为我很难解释**为什么导进去以后我不把手机里的删掉**。其实是有以下几点原因导致我*不敢轻易地*删掉手机中的照片：
+
+1. **Windows不支持实况照片。**实况照片导进Windows后虽然会以一小段MOV视频的方式保存，不会丢失，但毕竟和原照片不被视为一体，体验远不如iOS。而且，这种导入是“破坏性”的，因为很难再把这一对文件（HEIC和MOV）导回iOS并还原为实况照片。
+
+   > 实况照片你说他没用，那是真滴没用，就比如我拍食物的时候，根本就没有运动的物体。
+   >
+   > 但是说他有用，也确实有用。拍照的时候闭眼睛了、按下快门的时候已经错过时机了的时候，实况照片就是救命的功能。此外，如果要把照片连接起来做成视频，能动起来的图片怎么也比静态的图片效果要好。所以，我一直开着这个功能。信息，宁滥勿缺。
+
+2. **在电脑里很难查找照片。**导入电脑的时候我一律选择原始格式，所以Exif信息和GPS位置都不会丢失，但是在电脑上没有一个软件能做到像iOS系统自带照片应用一样，可以按拍摄地点查找！（注：已经找到了替代软件，但体验还是很差）此外，iOS自带应用还可以通过描述照片内容查找（例如在搜索框中输入“报纸”），按时间查找，这些Windows自带的照片应用也能做到，但是需要在后台建立索引，而我电脑内置硬盘不够大，照片数据只能存在外置的移动硬盘上，我又不能保证时时刻刻连接着它，所以GG。
+
+3. **这些照片可能需要展示给别人。**如果跟人聊天的时候突然想起来有一张照片特别有意思，却发现照片已经只存在于电脑里，那就只能不好意思地跟他说“我找不到了”。所以，应该再导之前先查看自己的照片，有哪些是不需要的，哪些是有价值的。但是这个过程太耗时间，再加上那种情况并不多见，还是没有养成这个习惯。（其实有个NAS的话就能解决了）
+
+其实这些问题都不算问题，该删照片还是要删，删了就不想这些”潜在风险“了。另外，我能拍出5000张照片来，这其中废片，一次性的截图也不少，本都应该删掉，但是还是犯了”仓鼠症“，觉得信息丢掉了心里总是不踏实。其实这样也有好处，就是当我找不到照片的时候，我可以排除掉”我不小心把它删了“这个可能性。此外，那些没啥用的一次性的截图看似没用，但当我翻到过去的聊天记录，看到10年前我截下来的屏幕截图，竟有一种考古发现的感觉。所以不妨把这些没用的截图也作为”史料“保存下来，10年后再看看当时的UI设计等等，想想也挺有意思的。
+
+那么，终于——问题来了。
+
+有用的照片、没用的废片、实况照片的小MOV视频、我拍的有用的MOV视频、我为了分享临时截的截图、存的表情包还有存的壁纸、插画，都导出到了**一个文件夹里**。这是多么令人头疼的一件事：
+
+1. 没有按目录分类，一个文件夹下几千个文件，浏览起来十分缓慢。
+2. 就算按文件扩展名分类，也得看文件大小才知道哪个是实况照片的MOV（后称假MOV），哪个是”真“视频。
+3. 照片管理软件会把表情包，截图通通当成照片管理，照片库混乱不堪。
+
+于是我迫切需要一个”离心机“，把这堆乱七八糟的文件一股脑投进去，搅啊搅，最后文件按类别，按时间分好类，整整齐齐地出来。
+
+那还等什么呢？赶紧造机器吧。
+
+## Inbox.py
+
+本来想贴上全部的代码，但是太长了，还是一点一点来吧。
+
+首先我们要遍历文件夹中的文件：
+
+```python
+basepath = Path(path)
+filesIn = (entry for entry in basepath.iterdir() if entry.is_file())
+for file in filesIn:
+    src = str(file) #src是当前处理的文件的绝对路径
+```
+
+这里写的太啰嗦了……当时是为了解决”把文件夹也给遍历了“的问题。
+
+接下来要把最让我头疼的假MOV揪出来。怎么办呢？按"MOV扩展名&&文件小&&时长短”的条件的话，不仅很难提取这两样信息（假MOV不是标准的视频），还容易误伤。其实假MOV有一个特点，就是**文件名中IMG_后面的编号和它对应的照片一致**。只要查找这个MOV的IMG编号，是不是还有一个与之相同编号的HEIC照片就行了：
+
+```python
+name0 = str(os.path.split(file)[1]).upper()#name0是文件全名
+name = name0.split('.')[1]#name是文件扩展名
+if name == 'MOV':
+    count['mov'] += 1
+    index = name0.find('IMG_')
+    if index != -1:
+        listMov.append(name0[index + 4: index + 8])#listMov里面是4位编号
+        listNo.append(src)#listNo里面是文件路径，应该和listMov里面的元素位置一一对应
+        # No actural action here, waiting for ListNo and ListYes
+    else:
+        passImgDirect(src, True)
+        print ('No index', name0)
+        
+elif name in ('HEIC','JPG','JPEG'):
+    index = name0.find('IMG_')
+    if index != -1:
+        listHeic.append(name0[index + 4: index + 8])#4位编号
+    if name in ('JPG','JPEG'):
+        count['jpg'] += 1
+        guessImg(src)#jpg需要进一步判断是照片还是表情包
+    else:
+        count['heic'] += 1
+        passImgDirect(src, True)#可以确定是照片了
+```
+
+等编号都找出来了，再秋后算账：
+
+```python
+while a < len(listMov):
+    if (listMov[a] in listHeic) == False:
+        listYes.append(listNo[a])
+        listMov.remove(listMov[a])
+        listNo.remove(listNo[a])
+    else:
+        a = a + 1
+        # 此处需要将假MOV的修改时间改为照片的
+#这里看似使用for循环更合适，但是这样的话两个list的对应关系会乱
+count['no'] = len(listNo)
+for src in listNo:
+    passImgDirect(src, False)
+for src in listYes:
+    passImgDirect(src, True)
+```
+
+passImgDirect(src, True)这个函数用来分发文件，传入参数为True就放进系统扫描的文件夹，False就放进不扫描的文件夹。假MOV，表情包，壁纸都是False。
+
+还有一个神秘函数guessImg(src)，专门用来猜jpg是什么类型的图片：
+
+```python
+def guessImg(src):
+    with Image.open(src) as img:
+        imgExif = dict(img.getexif())
+        imgType = img.format
+        wPixel = img.size[0]
+        hPixel = img.size[1]
+        if img.mode != 'RGB':#有些PNG文件是调色板格式
+            img = img.convert('RGB')
+            imgType = 'PNG'
+        if imgType == 'JPEG':
+            if imgExif.__contains__(271):
+                if (imgExif[271] == 'Apple'):
+                    rslt = 'Apple'
+                else:
+                    rslt = 'Photo'
+                    print ('Unknown Camera!')
+##            elif (wPixel in (1080, 1920)) and (hPixel in (1080, 1920)):
+##                rslt = 'Wechat'
+##这条规则已经不好使了，微信照片不一定是1920x1080了
+            elif (wPixel in (3024, 4032)) and (hPixel in (3024, 4032)):
+                rslt = 'Photo'
+            elif (wPixel in (1080, 1920)) or (hPixel in (1080, 1920)):
+                rslt = 'Photo'
+            elif wPixel in (750, 640, 1334):
+                rslt = 'Screenshot'
+            else:
+                analyze = analyzeImg(img)
+                if analyze:
+                    rslt = 'White'
+                else:
+                    print('Can\'t classify: ', src)
+                    rslt = 'Unknown'
+        else:
+            if wPixel in (750, 640, 1334):
+                rslt = 'Screenshot'
+            else:
+                analyze = analyzeImg(img)
+                if analyze:
+                    rslt = 'White'
+                else:
+                    print('Can\'t classify: ', src)
+                    rslt = 'Unknown'
+    dstDir = os.path.split(src)[0] + os.sep + rslt
+    moveFile(src, dstDir)
+```
+
+没有直接passImg是为什么呢？因为分类的结果还要人手动确认一下。
+
+又出现了一个神秘函数analyzeImg(img)，这个是用来鉴定图片是否（近似于）只有黑色白色的，一般来说熊猫人和扫描的文件都具有这样的特征。从直方图入手，写了个算法：
+
+```python
+def analyzeImg(im):
+    imsize = im.size[0] * im.size[1]
+    im0 = im.getchannel(0)
+    im1 = im.getchannel(1)
+    im2 = im.getchannel(2)
+    im3 = ImageMath.eval('((abs(r-b)+abs(r-g)+abs(g-b))/8)**30', \
+                         r=im0, g=im1, b=im2)
+    black = im3.histogram()[0] * 100000 // imsize
+##    print(black , '74695')
+    if black > 74695 or black == 0:
+        return (True)
+    else:
+        return (False)
+```
+
+黑色白色灰色的R、G、B值都是相同的，看RGB值的差小于一定程度的像素有多少，来判断是不是大部分黑白。
+
+74695这个阈值是试出来的。
+
+实际上这个算法表现很差……漏掉好多黑白图片，还需要进一步修改。
+
+```python
+def moveFile(src, dstDir):
+    if not os.path.exists(dstDir):
+        os.makedirs(dstDir)
+    filename = os.path.split(src)[1]
+    dst = os.path.join(dstDir, filename)
+    if not os.path.exists(dst):
+        os.rename(src, dst)
+        return (True)
+    else:
+        print('File already exists: %s' % dst)
+        return (False)
+```
+
+移动文件都要我重新写个轮子吗……但是不这样做的话就是疯狂报错。
+
+这些都运行完之后，再人工调整一下各个文件的分类，就可以愉快地按年份/月份分发到文件夹了！
+
+```python
+def passImg(src, media=False):
+    t = os.stat(src)
+    yyyy = str(time.localtime(t.st_mtime).tm_year)
+    mm = '{:0>2d}'.format(time.localtime(t.st_mtime).tm_mon)
+    if media:
+        dst0 = '/Apple'
+    else:
+        dst0 = '/Apple_nomedia'
+    dst0 = dst0 + '/' + yyyy + '/' + yyyy + '_' + mm
+    moveFile(src, dst0)
+```
+
+事实上，表情包、壁纸、扫描稿还是混合在一起放的，那分类有什么意义呢？把分类结果写在文件名里，下次就可以用Everything查找了：
+
+```python
+if not dirr in filename:#避免重复添加
+    dst = src[:index] + '_' + dirr + src[index:]
+    os.rename(src, dst)
+    passImg(dst, dirrDict[dirr])
+```
+最后再写一个交互和统计：
+
+```
+Processing...
+============Medias============
+MOV:0     HEIC:3    MP4:0     
+==========Non-Medias==========
+MOV:3     GIF:0     Others:0
+==Waiting for manually check==
+JPG:0     PNG:2
+==============================
+Total:11
+
+Processed in 0.115491
+Press Enter to continue
+
+Processing...
+==============================
+Apple:0      Illustration:0
+Photo:0      Screenshot:2
+Wechat:0     White:0
+Unknown:0
+==============================
+Total:2
+
+Processed in 0.021613
+Press Enter to exit
+```
+
+……就完成了！一台崭新的（东拼西凑的）离心机！
+
+为什么起名叫inbox呢？因为接收导入图片的文件夹叫inbox。
+
+## 总结
+
+事实上这个程序还有很多不足，经常明明哪里都没动就会出个bug。而且这么多的if else，这到底是脚本还是程序我也拿不太准。
+
+还有很多改进空间。时间判断应该读取exif里准确的拍摄时间，程序流程应该简化，算法应该再想个新的，要不然直接让机器学习一下什么叫表情包什么叫二次元老婆……
+
+不过要说感想的话，有一说一，比起Java，Python确实更简单更容易理解。
+
+> 人生苦短，我用Python。
+
+可别当笑话听。
