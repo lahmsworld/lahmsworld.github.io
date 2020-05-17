@@ -1177,6 +1177,7 @@ h6,
   font-weight: 500;
   line-height: 1.1;
   color: inherit;
+  text-shadow: 0 0px 5px black;
 }
 h1 small,
 h2 small,
